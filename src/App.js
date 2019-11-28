@@ -9,10 +9,6 @@ import Home from './pages/Home';
 import ChatRoom from './pages/ChatRoom';
 
 const App = ({firebase}) => {
-  useEffect(() => {
-    firebase.signIn();
-  }, []);
-
   return (
     <Switch>
       <Route exact path='/'>

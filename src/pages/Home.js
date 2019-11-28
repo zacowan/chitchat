@@ -28,10 +28,14 @@ const RootContainer = styled.div`
 
 const Home = ({firebase}) => {
   const [rooms, setRooms] = useState([]);
-  useEffect(() => {
-    const unsubscribe = firebase.attachChatRoomListener(setRooms);
-    return unsubscribe;
-  }, [rooms]);
+  // TODO: Listen event runs on every frame. NOT GOOD
+  // useEffect(() => {
+  //   const unsubscribe = firebase.attachChatRoomListener(vals => {
+  //     console.log('Listened!');
+  //     setRooms(vals);
+  //   });
+  //   return unsubscribe;
+  // }, [rooms]);
   const history = useHistory();
   const isMobile = useMediaQuery('(max-width:820px)');
   const createChatRoom = async value => {

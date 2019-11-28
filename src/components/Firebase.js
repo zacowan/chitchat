@@ -9,8 +9,10 @@ const FirebaseContext = React.createContext(null);
 class Firebase {
   constructor() {
     firebase.initializeApp(firebaseConfig);
-    this.auth = firebase.auth();
     this.firestore = firebase.firestore();
+    this.firestore.enablePersistence();
+    this.auth = firebase.auth();
+    this.signIn();
   }
 
   signIn = () => {
