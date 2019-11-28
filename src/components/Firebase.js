@@ -12,11 +12,22 @@ class Firebase {
     this.firestore = firebase.firestore();
     this.firestore.enablePersistence();
     this.auth = firebase.auth();
-    this.signIn();
   }
+
+  getDisplayName = () => {
+    return this.auth.currentUser.displayName;
+  };
+
+  setDisplayName = async value => {
+    await this.auth.currentUser.updateProfile({displayName: value});
+  };
 
   signIn = () => {
     return this.auth.signInAnonymously();
+  };
+
+  checkUser = () => {
+    return this.auth.currentUser ? true : false;
   };
 
   createChatRoom = async nickname => {
@@ -26,7 +37,7 @@ class Firebase {
     return data;
   };
 
-  joinChatRoom = async id => {
+  joinChatRoomById = async id => {
     const ref = this.firestore.collection('rooms').doc(id);
     const snap = await ref.get();
     const data = snap.data();
@@ -36,6 +47,7 @@ class Firebase {
   attachChatRoomListener = callback => {
     const ref = this.firestore.collection('rooms');
     const unsubscriber = ref.onSnapshot(snap => {
+      console.log('Listened!');
       let rooms = [];
       snap.docs.forEach(doc => {
         const data = doc.data();

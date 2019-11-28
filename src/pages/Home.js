@@ -16,6 +16,7 @@ import useMediaQuery from '@material-ui/core/useMediaQuery';
 // Custom components
 import {withFirebase} from '../components/Firebase';
 import FormDialog from '../components/FormDialog';
+import InputPromptModal from '../components/InputPromptModal';
 
 // Styled components
 const RootContainer = styled.div`
@@ -28,26 +29,44 @@ const RootContainer = styled.div`
 
 const Home = ({firebase}) => {
   const [rooms, setRooms] = useState([]);
-  // TODO: Listen event runs on every frame. NOT GOOD
-  // useEffect(() => {
-  //   const unsubscribe = firebase.attachChatRoomListener(vals => {
-  //     console.log('Listened!');
-  //     setRooms(vals);
-  //   });
-  //   return unsubscribe;
-  // }, [rooms]);
+  const [needsName, setNeedsName] = useState(false);
+  useEffect(() => {
+    const unsubscribe = firebase.attachChatRoomListener(setRooms);
+    if (firebase.getDisplayName() === null) {
+      setNeedsName(true);
+    }
+    return () => {
+      unsubscribe();
+    };
+  }, []);
   const history = useHistory();
   const isMobile = useMediaQuery('(max-width:820px)');
   const createChatRoom = async value => {
-    const {id, nickname} = await firebase.createChatRoom(value);
+    const room = await firebase.createChatRoom(value);
+    joinChatRoom(room);
+  };
+  const joinChatRoom = room => {
+    const {id, nickname} = room;
     history.push(`/chatroom/${id}`, {nickname: nickname});
   };
-  const joinChatRoom = async value => {
-    const {id, nickname} = await firebase.joinChatRoom(value);
-    history.push(`/chatroom/${id}`, {nickname: nickname});
+  const joinChatRoomById = async value => {
+    const room = await firebase.joinChatRoomById(value);
+    joinChatRoom(room);
+  };
+  const setDisplayName = async value => {
+    await firebase.setDisplayName(value);
+    setNeedsName(false);
   };
   return (
     <RootContainer>
+      <InputPromptModal
+        open={needsName}
+        title='Enter A Name'
+        description='This name will be used to identify you in chat rooms.'
+        inputLabel='Name'
+        submitLabel='Done'
+        onSubmit={setDisplayName}
+      />
       <AppBar position='static'>
         <Toolbar>
           <Typography variant='h6' style={{flex: 1}}>
@@ -67,7 +86,7 @@ const Home = ({firebase}) => {
             dialogDescription='Enter the unique id of the chat room that you want to join. Each chat room has a unique id, separate from its nickname.'
             inputLabel='Unique ID'
             submitLabel='Join'
-            onSubmit={joinChatRoom}
+            onSubmit={joinChatRoomById}
           >
             Join Room
           </FormDialog>
@@ -92,10 +111,7 @@ const Home = ({firebase}) => {
                   <CardActions
                     style={{display: 'flex', justifyContent: 'flex-end'}}
                   >
-                    <Button
-                      color='primary'
-                      onClick={() => joinChatRoom(room.id)}
-                    >
+                    <Button color='primary' onClick={() => joinChatRoom(room)}>
                       Join
                     </Button>
                   </CardActions>
