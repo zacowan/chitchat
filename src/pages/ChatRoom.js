@@ -5,16 +5,20 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Container from '@material-ui/core/Container';
-import List from '@material-ui/core/ListItem';
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
 import {useTransition, animated} from 'react-spring';
 
 // Custom components
 import {withFirebase} from '../components/Firebase';
 import MessageBar from '../components/MessageBar';
+
+// TODO: Scroll to bottom when messages is updated
 
 const ChatRoom = ({firebase}) => {
   const location = useLocation();
@@ -53,16 +57,17 @@ const ChatRoom = ({firebase}) => {
     }
     return (
       <ListItem
-        style={{maxWidth: '45%', display: 'flex', ...props}}
+        style={{display: 'flex', ...props}}
         component={animated.div}
         key={key}
       >
         <Paper
           style={{
-            padding: 10,
+            padding: 20,
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'center'
+            alignItems: 'center',
+            maxWidth: '50%'
           }}
         >
           {!selfAuthored && (
@@ -88,33 +93,27 @@ const ChatRoom = ({firebase}) => {
         flexDirection: 'column'
       }}
     >
-      <section>
-        <Paper
-          style={{
-            display: 'flex',
-            alignItems: 'center'
-          }}
-        >
-          <Button style={{marginLeft: 20}} component={Link} to='/'>
-            Back
-          </Button>
-          <Container style={{paddingTop: 20, paddingBottom: 20}}>
-            <Typography variant='h3'>{roomNickname}</Typography>
+      <AppBar position='static'>
+        <Toolbar>
+          <div style={{flex: 1}}>
+            <Typography variant='h6'>{roomNickname}</Typography>
             <Typography variant='subtitle1'>Room ID: {roomId}</Typography>
-          </Container>
-        </Paper>
-      </section>
+          </div>
+          <Button color='inherit' component={Link} to='/'>
+            Leave Room
+          </Button>
+        </Toolbar>
+      </AppBar>
       <section
         style={{
           flex: 1,
-          backgroundColor: 'blue'
+          backgroundColor: 'blue',
+          overflow: 'scroll'
         }}
       >
-        <List>
-          {transitions.map(({item, props, key}) =>
-            renderMessage({item, props, key})
-          )}
-        </List>
+        <Container>
+          <List>{transitions.map(renderMessage)}</List>
+        </Container>
       </section>
       <section>
         <MessageBar onSubmit={sendMessage} />
