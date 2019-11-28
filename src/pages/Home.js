@@ -106,7 +106,6 @@ const Home = ({firebase}) => {
                     <Typography variant='subtitle2'>
                       Members: {room.members}
                     </Typography>
-                    {/* <div style={{height: 100}} /> */}
                   </CardContent>
                   <CardActions
                     style={{display: 'flex', justifyContent: 'flex-end'}}

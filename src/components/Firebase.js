@@ -30,9 +30,17 @@ class Firebase {
     return this.auth.currentUser ? true : false;
   };
 
+  getUser = () => {
+    return this.auth.currentUser;
+  };
+
   createChatRoom = async nickname => {
     const ref = this.firestore.collection('rooms').doc();
-    const data = {nickname: nickname, id: ref.id};
+    const data = {
+      nickname: nickname,
+      id: ref.id,
+      timestamp: firebase.firestore.Timestamp.now()
+    };
     await ref.set(data);
     return data;
   };
@@ -44,10 +52,31 @@ class Firebase {
     return data;
   };
 
+  sendMessage = async (roomId, content) => {
+    const ref = this.firestore
+      .collection('rooms')
+      .doc(roomId)
+      .collection('messages')
+      .doc();
+    const data = {
+      content: content,
+      author: {
+        displayName: this.getDisplayName(),
+        uid: this.auth.currentUser.uid
+      },
+      timestamp: firebase.firestore.Timestamp.now()
+    };
+    await ref.set(data);
+    return data;
+  };
+
   attachChatRoomListener = callback => {
-    const ref = this.firestore.collection('rooms');
+    const ref = this.firestore
+      .collection('rooms')
+      .orderBy('timestamp', 'desc')
+      .limitToLast(50);
     const unsubscriber = ref.onSnapshot(snap => {
-      console.log('Listened!');
+      console.log('Grabbed some rooms!');
       let rooms = [];
       snap.docs.forEach(doc => {
         const data = doc.data();
@@ -55,6 +84,25 @@ class Firebase {
         rooms = [...rooms, {id: id, nickname: nickname, members: 0}];
       });
       callback(rooms);
+    });
+    return unsubscriber;
+  };
+
+  attachMessageListener = (roomId, callback) => {
+    const ref = this.firestore
+      .collection('rooms')
+      .doc(roomId)
+      .collection('messages')
+      .orderBy('timestamp', 'asc')
+      .limitToLast(50);
+    const unsubscriber = ref.onSnapshot(snap => {
+      console.log('Grabbed some messages!');
+      let messages = [];
+      snap.docs.forEach(doc => {
+        const data = doc.data();
+        messages = [...messages, data];
+      });
+      callback(messages);
     });
     return unsubscriber;
   };
