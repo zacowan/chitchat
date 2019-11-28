@@ -15,6 +15,7 @@ const MessageBar = props => {
       style={{
         padding: 10
       }}
+      elevation={8}
     >
       <Container>
         <form

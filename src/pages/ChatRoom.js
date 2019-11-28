@@ -87,7 +87,6 @@ const ChatRoom = ({firebase}) => {
     <div
       style={{
         maxHeight: '100vh',
-        backgroundColor: 'red',
         display: 'flex',
         minHeight: '100vh',
         flexDirection: 'column'
@@ -107,7 +106,6 @@ const ChatRoom = ({firebase}) => {
       <section
         style={{
           flex: 1,
-          backgroundColor: 'blue',
           overflow: 'scroll'
         }}
       >
