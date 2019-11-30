@@ -12,7 +12,9 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
+import Divider from '@material-ui/core/Divider';
 import {useTransition, animated} from 'react-spring';
+import {animateScroll} from 'react-scroll';
 
 // Custom components
 import {withFirebase} from '../components/Firebase';
@@ -27,7 +29,13 @@ const ChatRoom = ({firebase}) => {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = firebase.attachMessageListener(roomId, setMessages);
+    const unsubscribe = firebase.attachMessageListener(roomId, val => {
+      setMessages(val);
+      animateScroll.scrollToBottom({
+        containerId: 'message-container',
+        duration: 0
+      });
+    });
     return () => {
       unsubscribe();
     };
@@ -94,20 +102,27 @@ const ChatRoom = ({firebase}) => {
     >
       <AppBar position='static'>
         <Toolbar>
-          <div style={{flex: 1}}>
-            <Typography variant='h6'>{roomNickname}</Typography>
-            <Typography variant='subtitle1'>Room ID: {roomId}</Typography>
-          </div>
+          <Typography variant='h6' style={{flex: 1}}>
+            ChitChat
+          </Typography>
           <Button color='inherit' component={Link} to='/'>
             Leave Room
           </Button>
         </Toolbar>
       </AppBar>
+      <section style={{marginTop: 40, marginLeft: 20, marginRight: 20}}>
+        <Container>
+          <Typography variant='h4'>{roomNickname}</Typography>
+          <Typography variant='subtitle1'>Room ID: {roomId}</Typography>
+          <Divider style={{marginBottom: 20}} />
+        </Container>
+      </section>
       <section
         style={{
           flex: 1,
           overflow: 'scroll'
         }}
+        id='message-container'
       >
         <Container>
           <List>{transitions.map(renderMessage)}</List>
